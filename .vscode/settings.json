@@ -1,0 +1,25 @@
+{
+  // General Editor Settings
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "editor.formatOnType": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.fontWeight": "normal",
+
+  // General Files Settings
+  "files.autoSave": "onFocusChange",
+
+  // Prettier ESLint Settings
+  "vs-code-prettier-eslint.prettierLast": false,
+
+  // TypeScript Settings
+  "[typescript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+
+  // JSON Settings
+  "[json]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  }
+}

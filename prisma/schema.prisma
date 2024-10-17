@@ -6,3 +6,48 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum CommandType {
+  BASIC
+  ADVANCED
+}
+
+model CommandParameter {
+  id          String  @id @default(uuid())
+  name        String
+  description String
+  payload     String?
+
+  // Relations - CommandOption
+  CommandOption   CommandOption? @relation(fields: [commandOptionId], references: [id], onDelete: Cascade)
+  commandOptionId String?
+
+  // Relations - Command
+  Command   Command? @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  commandId String?
+}
+
+model CommandOption {
+  id                String             @id @default(uuid())
+  name              String
+  description       String
+  payload           String
+  delimiter         String?
+  enabled           Boolean
+  parameterRequired Boolean
+  parameters        CommandParameter[]
+
+  // Relations - Command
+  Command   Command? @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  commandId String?
+}
+
+model Command {
+  id          String             @id @default(uuid())
+  type        CommandType
+  name        String
+  description String
+  payload     String
+  options     CommandOption[]
+  parameters  CommandParameter[]
+}

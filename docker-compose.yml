@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  patchef-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: patchef-server
+    restart: always
+    ports:
+      - '3000:3000'
+    depends_on:
+      - patchef-database
+    env_file:
+      - .env
+
+  patchef-database:
+    image: postgres:14
+    container_name: patchef-database
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    volumes:
+      - patchef-database:/var/lib/postgresql/data
+
+volumes:
+  patchef-database:
+    name: patchef-database

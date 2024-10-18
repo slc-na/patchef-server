@@ -48,6 +48,10 @@ export class CommandsService {
       where: {
         id,
       },
+      include: {
+        options: true,
+        parameters: true,
+      },
     });
   }
 

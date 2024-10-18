@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -33,6 +34,9 @@ import { CommandEntity } from './entities/command.entity';
 export class CommandsController {
   constructor(private readonly commandsService: CommandsService) {}
 
+  @ApiBody({
+    type: CreateCommandDto,
+  })
   @ApiCreatedResponse({
     type: CommandEntity,
     description: 'The command has been successfully created.',
@@ -67,6 +71,9 @@ export class CommandsController {
     return new CommandEntity(await this.commandsService.findOne(id));
   }
 
+  @ApiBody({
+    type: UpdateCommandDto,
+  })
   @ApiOkResponse({ type: CommandEntity })
   @ApiNotFoundResponse({
     description: 'Command not found',

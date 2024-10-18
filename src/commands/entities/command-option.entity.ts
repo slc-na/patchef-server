@@ -64,9 +64,15 @@ export class CommandOptionEntity implements CommandOption {
   @Expose()
   parameterRequired: boolean;
 
+  @ApiProperty({
+    type: CommandParameterEntity,
+    isArray: true,
+    required: false,
+  })
+  @Expose()
+  @Transform(({ value }) => (value.length === 0 ? undefined : value))
+  parameters?: CommandParameterEntity[];
+
   @Exclude()
   commandId: string | null;
-
-  @Expose()
-  parameters?: CommandParameterEntity[];
 }

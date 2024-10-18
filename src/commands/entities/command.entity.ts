@@ -1,5 +1,5 @@
 import { Command, CommandType } from '@prisma/client';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { CommandOptionEntity } from './command-option.entity';
 import { CommandParameterEntity } from './command-parameter.entity';
@@ -54,6 +54,7 @@ export class CommandEntity implements Command {
     required: false,
   })
   @Expose()
+  @Transform(({ value }) => (value.length === 0 ? undefined : value))
   options?: CommandOptionEntity[];
 
   @ApiProperty({
@@ -62,5 +63,6 @@ export class CommandEntity implements Command {
     required: false,
   })
   @Expose()
+  @Transform(({ value }) => (value.length === 0 ? undefined : value))
   parameters?: CommandParameterEntity[];
 }

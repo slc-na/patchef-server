@@ -9,39 +9,70 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { CreateCommandOptionDto } from './create-command-option.dto';
 import { CreateCommandParameterDto } from './create-command-parameter.dto';
 
 export class CreateCommandDto {
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
   @Type(() => String)
   @IsUUID()
   @IsNotEmpty()
   id: string;
 
+  @ApiProperty({
+    enum: CommandType,
+    required: true,
+  })
   @IsEnum(CommandType)
   type: CommandType;
 
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
   @Type(() => String)
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
   @Type(() => String)
   @IsString()
   @IsNotEmpty()
   description: string;
 
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
   @Type(() => String)
   @IsString()
   @IsNotEmpty()
   payload: string;
 
+  @ApiProperty({
+    type: CreateCommandOptionDto,
+    isArray: true,
+    required: false,
+  })
   @Type(() => CreateCommandOptionDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
   options?: CreateCommandOptionDto[];
 
+  @ApiProperty({
+    type: CreateCommandParameterDto,
+    isArray: true,
+    required: false,
+  })
   @Type(() => CreateCommandParameterDto)
   @ValidateNested({ each: true })
   @IsArray()

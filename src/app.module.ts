@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { PrismaClientExceptionFilter, PrismaModule } from 'nestjs-prisma';
 import { CommandsModule } from './commands/commands.module';
+import { RecipesModule } from './recipes/recipes.module';
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { CommandsModule } from './commands/commands.module';
       isGlobal: true,
     }),
     CommandsModule,
+    RecipesModule,
   ],
   providers: [
     {

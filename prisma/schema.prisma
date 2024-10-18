@@ -50,4 +50,14 @@ model Command {
   payload     String
   options     CommandOption[]
   parameters  CommandParameter[]
+
+  // Relations - Recipe
+  Recipe   Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId String?
+}
+
+model Recipe {
+  id       String    @id @default(uuid())
+  name     String
+  commands Command[]
 }

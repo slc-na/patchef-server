@@ -62,6 +62,11 @@ export class CommandsService {
      */
     const { options, parameters, ...command } = updateCommandDto;
 
+    /*
+     * The updated options and parameters are created by iterating over the existing options and parameters and updating
+     * the values with the new ones. The commandId is set to undefined to prevent it from being included in the update.
+     * Note: The Update DTOs for options and parameters MUST HAVE an id field to identify the option or parameter to update.
+     */
     const commandOptions = await this.prismaService.commandOption.findMany({
       where: {
         commandId: id,

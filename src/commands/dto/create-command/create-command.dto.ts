@@ -61,21 +61,23 @@ export class CreateCommandDto {
     type: CreateCommandOptionDto,
     isArray: true,
     required: false,
+    default: [],
   })
   @Type(() => CreateCommandOptionDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  options?: CreateCommandOptionDto[];
+  options?: CreateCommandOptionDto[] = [];
 
   @ApiProperty({
     type: CreateCommandParameterDto,
     isArray: true,
     required: false,
+    default: [],
   })
   @Type(() => CreateCommandParameterDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  parameters?: CreateCommandParameterDto[];
+  parameters?: CreateCommandParameterDto[] = [];
 }

@@ -77,10 +77,11 @@ export class CreateCommandOptionDto {
     type: CreateCommandParameterDto,
     isArray: true,
     required: false,
+    default: [],
   })
   @Type(() => CreateCommandParameterDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  parameters?: CreateCommandParameterDto[];
+  parameters?: CreateCommandParameterDto[] = [];
 }

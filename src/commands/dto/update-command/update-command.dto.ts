@@ -9,8 +9,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UpdateCommandOptionDto } from './update-command-option.dto';
-import { UpdateCommandParameterDto } from './update-command-parameter.dto';
+import { CreateCommandOptionDto } from '../create-command/create-command-option.dto';
+import { CreateCommandParameterDto } from '../create-command/create-command-parameter.dto';
 
 export class UpdateCommandDto {
   @ApiProperty({
@@ -57,25 +57,38 @@ export class UpdateCommandDto {
   @IsOptional()
   payload?: string;
 
+  /*
+   * Prisma does not support nested createMany operations. This means that we
+   * cannot update a command with nested options and parameters in a single
+   * transaction. We need to delete the existing options and parameters and
+   * create new ones, that's why we use CreateCommandOptionDto and
+   * CreateCommandParameterDto.
+   *
+   * - MY23-1
+   */
   @ApiProperty({
-    type: UpdateCommandOptionDto,
+    type: CreateCommandOptionDto,
     isArray: true,
     required: false,
+    description:
+      "Note: Prisma does not support nested createMany operations, This means that we cannot update a command with nested options and parameters in a single transaction. We need to delete the existing options and parameters and create new ones, that's why we use CreateCommandOptionDto and CreateCommandParameterDto. - MY23-1",
   })
-  @Type(() => UpdateCommandOptionDto)
+  @Type(() => CreateCommandOptionDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  options?: UpdateCommandOptionDto[];
+  options?: CreateCommandOptionDto[];
 
   @ApiProperty({
-    type: UpdateCommandParameterDto,
+    type: CreateCommandParameterDto,
     isArray: true,
     required: false,
+    description:
+      "Note: Prisma does not support nested createMany operations, This means that we cannot update a command with nested options and parameters in a single transaction. We need to delete the existing options and parameters and create new ones, that's why we use CreateCommandOptionDto and CreateCommandParameterDto. - MY23-1",
   })
-  @Type(() => UpdateCommandParameterDto)
+  @Type(() => CreateCommandParameterDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  parameters?: UpdateCommandParameterDto[];
+  parameters?: CreateCommandParameterDto[];
 }

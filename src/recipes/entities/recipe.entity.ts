@@ -26,6 +26,6 @@ export class RecipeEntity implements Recipe {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => (value.length === 0 ? undefined : value))
+  @Transform(({ value }) => (value && value.length === 0 ? undefined : value))
   commands?: CommandEntity[];
 }

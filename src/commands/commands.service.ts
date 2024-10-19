@@ -9,35 +9,69 @@ export class CommandsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createCommandDto: CreateCommandDto): Promise<Command> {
-    const { options, parameters, ...command } = createCommandDto;
+    const {
+      options: commandOptions,
+      parameters: commandParameters,
+      ...commandData
+    } = createCommandDto;
 
-    const newCommand = await this.prismaService.command.create({
-      data: {
-        ...command,
-        options: {
-          createMany: {
-            data: options,
+    const createdCommand = await this.prismaService.$transaction(
+      async (prisma) => {
+        const createdCommand = await prisma.command.create({
+          data: {
+            ...commandData,
+            parameters: {
+              createMany: {
+                data: commandParameters,
+              },
+            },
           },
-        },
-        parameters: {
-          createMany: {
-            data: parameters,
-          },
-        },
-      },
-      include: {
-        options: true,
-        parameters: true,
-      },
-    });
+        });
 
-    return newCommand;
+        for (const commandOption of commandOptions) {
+          const { parameters: commandOptionParameters, ...commandOptionData } =
+            commandOption;
+
+          await prisma.commandOption.create({
+            data: {
+              ...commandOptionData,
+              commandId: createdCommand.id,
+              parameters: {
+                createMany: {
+                  data: commandOptionParameters,
+                },
+              },
+            },
+          });
+        }
+
+        return prisma.command.findUnique({
+          where: {
+            id: createdCommand.id,
+          },
+          include: {
+            options: {
+              include: {
+                parameters: true,
+              },
+            },
+            parameters: true,
+          },
+        });
+      },
+    );
+
+    return createdCommand;
   }
 
   async findAll(): Promise<Command[]> {
     return await this.prismaService.command.findMany({
       include: {
-        options: true,
+        options: {
+          include: {
+            parameters: true,
+          },
+        },
         parameters: true,
       },
     });
@@ -59,81 +93,84 @@ export class CommandsService {
     id: string,
     updateCommandDto: UpdateCommandDto,
   ): Promise<Command> {
-    /*
-     * The following code is used to update a command in the database.
-     * It retrieves the options and parameters from the updateCommandDto and updates the command with the new values.
-     * The updated command is then returned.
-     */
-    const { options, parameters, ...command } = updateCommandDto;
+    const {
+      options: commandOptions,
+      parameters: commandParameters,
+      ...commandData
+    } = updateCommandDto;
 
-    /*
-     * The updated options and parameters are created by iterating over the existing options and parameters and updating
-     * the values with the new ones. The commandId is set to undefined to prevent it from being included in the update.
-     * Note: The Update DTOs for options and parameters MUST HAVE an id field to identify the option or parameter to update.
-     */
-    const commandOptions = await this.prismaService.commandOption.findMany({
-      where: {
-        commandId: id,
-      },
-    });
-
-    const updatedCommandOptions = commandOptions.map((option) => {
-      for (const updateOption of options) {
-        if (option.id === updateOption.id) {
-          return { ...option, ...updateOption, commandId: undefined };
-        }
-      }
-    });
-
-    const commandParameters =
-      await this.prismaService.commandParameter.findMany({
-        where: {
-          commandId: id,
-        },
-      });
-
-    const updatedCommandParameters = commandParameters.map((parameter) => {
-      for (const updateParameter of parameters) {
-        if (parameter.id === updateParameter.id) {
-          return { ...parameter, ...updateParameter, commandId: undefined };
-        }
-      }
-    });
-
-    /*
-     * Updating the command involves deleting the existing options and parameters and creating new ones.
-     * The new ones are actually just the old ones with the updated values.
-     */
-    const updatedCommand = await this.prismaService.command.update({
-      where: { id },
-      data: {
-        ...command,
-        options: {
-          deleteMany: {},
-          createMany: {
-            data: updatedCommandOptions,
+    const updatedCommand = await this.prismaService.$transaction(
+      async (prisma) => {
+        const updatedCommand = await prisma.command.update({
+          where: { id },
+          data: {
+            ...commandData,
+            parameters: {
+              deleteMany: {},
+              createMany: {
+                data: commandParameters.map((parameter) => ({
+                  id: parameter.id,
+                  name: parameter.name,
+                  description: parameter.description,
+                  payload: parameter.payload,
+                })),
+              },
+            },
+            options: {
+              deleteMany: {},
+            },
           },
-        },
-        parameters: {
-          deleteMany: {},
-          createMany: {
-            data: updatedCommandParameters,
+        });
+
+        for (const commandOption of commandOptions) {
+          const { parameters: commandOptionParameters, ...commandOptionData } =
+            commandOption;
+
+          await prisma.commandOption.create({
+            data: {
+              ...commandOptionData,
+              commandId: updatedCommand.id,
+              parameters: {
+                createMany: {
+                  data: commandOptionParameters,
+                },
+              },
+            },
+          });
+        }
+
+        return prisma.command.findUnique({
+          where: {
+            id: updatedCommand.id,
           },
-        },
+          include: {
+            options: {
+              include: {
+                parameters: true,
+              },
+            },
+            parameters: true,
+          },
+        });
       },
-      include: {
-        options: true,
-        parameters: true,
-      },
-    });
+    );
 
     return updatedCommand;
   }
 
   async remove(id: string): Promise<Command> {
-    return await this.prismaService.command.delete({
-      where: { id },
-      include: { options: true, parameters: true },
+    return await this.prismaService.$transaction(async (prisma) => {
+      return await prisma.command.delete({
+        where: { id },
+        include: {
+          options: {
+            include: {
+              parameters: true,
+            },
+          },
+          parameters: true,
+        },
+      });
     });
   }
 }

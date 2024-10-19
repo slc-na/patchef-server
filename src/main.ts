@@ -14,6 +14,13 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
+  // CORS Configuration
+  app.enableCors({
+    origin: process.env.CLIENT_URL,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+  });
+
   // Static Files Configuration
   app
     .getHttpAdapter()
@@ -37,7 +44,7 @@ async function bootstrap() {
     customfavIcon: './public/square-terminal.svg',
   });
 
-  await app.listen({ port: 3000 });
+  await app.listen({ port: 6970 });
 }
 
 bootstrap();

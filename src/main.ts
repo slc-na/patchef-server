@@ -32,7 +32,7 @@ async function bootstrap() {
 
   // Swagger Document Build Setup
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory, {
+  SwaggerModule.setup('/docs', app, documentFactory, {
     customSiteTitle: 'PatChef API',
     customfavIcon: './public/square-terminal.svg',
   });

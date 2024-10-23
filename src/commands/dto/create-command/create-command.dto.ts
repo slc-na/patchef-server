@@ -12,16 +12,17 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCommandOptionDto } from './create-command-option.dto';
 import { CreateCommandParameterDto } from './create-command-parameter.dto';
+import { v4 as generateUuidV4 } from 'uuid';
 
 export class CreateCommandDto {
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
   })
   @Type(() => String)
   @IsUUID()
-  @IsNotEmpty()
-  id: string;
+  @IsOptional()
+  id?: string;
 
   @ApiProperty({
     enum: CommandType,
@@ -80,4 +81,10 @@ export class CreateCommandDto {
   @IsArray()
   @IsOptional()
   parameters?: CreateCommandParameterDto[] = [];
+
+  constructor() {
+    if (!this.id) {
+      this.id = generateUuidV4();
+    }
+  }
 }

@@ -20,29 +20,34 @@ export class CommandsService {
         const createdCommand = await prisma.command.create({
           data: {
             ...commandData,
+            originalId: commandData.id,
             parameters: {
               createMany: {
-                data: commandParameters,
+                data: commandParameters ? commandParameters : [],
               },
             },
           },
         });
 
-        for (const commandOption of commandOptions) {
-          const { parameters: commandOptionParameters, ...commandOptionData } =
-            commandOption;
+        if (commandOptions) {
+          for (const commandOption of commandOptions) {
+            const {
+              parameters: commandOptionParameters,
+              ...commandOptionData
+            } = commandOption;
 
-          await prisma.commandOption.create({
-            data: {
-              ...commandOptionData,
-              commandId: createdCommand.id,
-              parameters: {
-                createMany: {
-                  data: commandOptionParameters,
+            await prisma.commandOption.create({
+              data: {
+                ...commandOptionData,
+                commandId: createdCommand.id,
+                parameters: {
+                  createMany: {
+                    data: commandOptionParameters,
+                  },
                 },
               },
-            },
-          });
+            });
+          }
         }
 
         return prisma.command.findUnique({
@@ -108,12 +113,14 @@ export class CommandsService {
             parameters: {
               deleteMany: {},
               createMany: {
-                data: commandParameters.map((parameter) => ({
-                  id: parameter.id,
-                  name: parameter.name,
-                  description: parameter.description,
-                  payload: parameter.payload,
-                })),
+                data: commandParameters
+                  ? commandParameters.map((parameter) => ({
+                      id: parameter.id,
+                      name: parameter.name,
+                      description: parameter.description,
+                      payload: parameter.payload,
+                    }))
+                  : [],
               },
             },
             options: {
@@ -122,21 +129,25 @@ export class CommandsService {
           },
         });
 
-        for (const commandOption of commandOptions) {
-          const { parameters: commandOptionParameters, ...commandOptionData } =
-            commandOption;
+        if (commandOptions) {
+          for (const commandOption of commandOptions) {
+            const {
+              parameters: commandOptionParameters,
+              ...commandOptionData
+            } = commandOption;
 
-          await prisma.commandOption.create({
-            data: {
-              ...commandOptionData,
-              commandId: updatedCommand.id,
-              parameters: {
-                createMany: {
-                  data: commandOptionParameters,
+            await prisma.commandOption.create({
+              data: {
+                ...commandOptionData,
+                commandId: updatedCommand.id,
+                parameters: {
+                  createMany: {
+                    data: commandOptionParameters,
+                  },
                 },
               },
-            },
-          });
+            });
+          }
         }
 
         return prisma.command.findUnique({
@@ -159,18 +170,16 @@ export class CommandsService {
   }
 
   async remove(id: string): Promise<Command> {
-    return await this.prismaService.$transaction(async (prisma) => {
-      return await prisma.command.delete({
-        where: { id },
-        include: {
-          options: {
-            include: {
-              parameters: true,
-            },
+    return await this.prismaService.command.delete({
+      where: { id },
+      include: {
+        options: {
+          include: {
+            parameters: true,
           },
-          parameters: true,
         },
-      });
+        parameters: true,
+      },
     });
   }
 }

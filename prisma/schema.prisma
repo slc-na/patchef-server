@@ -44,20 +44,32 @@ model CommandOption {
 
 model Command {
   id          String             @id @default(uuid())
+  originalId  String
   type        CommandType
   name        String
   description String
   payload     String
   options     CommandOption[]
   parameters  CommandParameter[]
-
-  // Relations - Recipe
-  Recipe   Recipe? @relation(fields: [recipeId], references: [id])
-  recipeId String?
+  recipes     CommandsInRecipe[]
 }
 
 model Recipe {
-  id       String    @id @default(uuid())
+  id       String             @id @default(uuid())
   name     String
-  commands Command[]
+  commands CommandsInRecipe[]
+}
+
+model CommandsInRecipe {
+  order Int
+
+  // Relations - Command
+  command   Command @relation(fields: [commandId], references: [id])
+  commandId String
+
+  // Relations - Recipe
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipeId String
+
+  @@id([commandId, recipeId, order])
 }

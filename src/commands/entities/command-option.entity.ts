@@ -4,16 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CommandParameterEntity } from './command-parameter.entity';
 
 export class CommandOptionEntity implements CommandOption {
-  constructor({ parameters, ...partial }: Partial<CommandOptionEntity>) {
-    Object.assign(this, partial);
-
-    if (parameters) {
-      this.parameters = parameters.map(
-        (parameter) => new CommandParameterEntity(parameter),
-      );
-    }
-  }
-
   @ApiProperty({
     type: String,
     required: true,
@@ -75,4 +65,14 @@ export class CommandOptionEntity implements CommandOption {
 
   @Exclude()
   commandId: string | null;
+
+  constructor({ parameters, ...partial }: Partial<CommandOptionEntity>) {
+    Object.assign(this, partial);
+
+    if (parameters) {
+      this.parameters = parameters.map(
+        (parameter) => new CommandParameterEntity(parameter),
+      );
+    }
+  }
 }

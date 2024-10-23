@@ -4,14 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CommandEntity } from 'src/commands/entities/command.entity';
 
 export class RecipeEntity implements Recipe {
-  constructor({ commands, ...partial }: Partial<RecipeEntity>) {
-    Object.assign(this, partial);
-
-    if (commands) {
-      this.commands = commands.map((command) => new CommandEntity(command));
-    }
-  }
-
   @ApiProperty({ type: String, required: true })
   @Expose()
   id: string;
@@ -26,6 +18,18 @@ export class RecipeEntity implements Recipe {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => (value && value.length === 0 ? undefined : value))
+  @Transform(({ value }) =>
+    value && value.length === 0
+      ? undefined
+      : value.map((commandRaw) => new CommandEntity(commandRaw.command)),
+  )
   commands?: CommandEntity[];
+
+  constructor({ commands, ...partial }: Partial<RecipeEntity>) {
+    Object.assign(this, partial);
+
+    if (commands) {
+      this.commands = commands.map((command) => new CommandEntity(command));
+    }
+  }
 }

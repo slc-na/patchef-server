@@ -8,17 +8,17 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateCommandDto } from 'src/commands/dto/create-command/create-command.dto';
+import { CreateRecipeCommandDto } from './create-recipe-command.dto';
 
 export class CreateRecipeDto {
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
   })
   @Type(() => String)
   @IsUUID()
-  @IsNotEmpty()
-  id: string;
+  @IsOptional()
+  id?: string;
 
   @ApiProperty({
     type: String,
@@ -30,23 +30,14 @@ export class CreateRecipeDto {
   name: string;
 
   @ApiProperty({
-    type: String,
-    required: true,
-  })
-  @Type(() => String)
-  @IsString()
-  @IsNotEmpty()
-  description: string;
-
-  @ApiProperty({
-    type: CreateCommandDto,
+    type: CreateRecipeCommandDto,
     isArray: true,
     required: false,
     default: [],
   })
-  @Type(() => CreateCommandDto)
+  @Type(() => CreateRecipeCommandDto)
   @ValidateNested({ each: true })
   @IsArray()
   @IsOptional()
-  commands?: CreateCommandDto[] = [];
+  commands?: CreateRecipeCommandDto[] = [];
 }

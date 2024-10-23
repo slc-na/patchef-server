@@ -3,10 +3,6 @@ import { Exclude, Expose, Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CommandParameterEntity implements CommandParameter {
-  constructor(partial: Partial<CommandParameterEntity>) {
-    Object.assign(this, partial);
-  }
-
   @ApiProperty({
     type: String,
     required: true,
@@ -41,4 +37,8 @@ export class CommandParameterEntity implements CommandParameter {
 
   @Exclude()
   commandId: string | null;
+
+  constructor(partial: Partial<CommandParameterEntity>) {
+    Object.assign(this, partial);
+  }
 }

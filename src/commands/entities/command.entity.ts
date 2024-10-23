@@ -5,23 +5,13 @@ import { CommandOptionEntity } from './command-option.entity';
 import { CommandParameterEntity } from './command-parameter.entity';
 
 export class CommandEntity implements Command {
-  constructor({ options, parameters, ...partial }: Partial<CommandEntity>) {
-    Object.assign(this, partial);
-
-    if (options) {
-      this.options = options.map((option) => new CommandOptionEntity(option));
-    }
-
-    if (parameters) {
-      this.parameters = parameters.map(
-        (parameter) => new CommandParameterEntity(parameter),
-      );
-    }
-  }
-
   @ApiProperty({ type: String, required: true })
   @Expose()
   id: string;
+
+  @ApiProperty({ type: String, required: true })
+  @Expose()
+  originalId: string;
 
   @ApiProperty({ type: String, required: true })
   @Expose()
@@ -68,4 +58,18 @@ export class CommandEntity implements Command {
 
   @Exclude()
   recipeId: string | null;
+
+  constructor({ options, parameters, ...partial }: Partial<CommandEntity>) {
+    Object.assign(this, partial);
+
+    if (options) {
+      this.options = options.map((option) => new CommandOptionEntity(option));
+    }
+
+    if (parameters) {
+      this.parameters = parameters.map(
+        (parameter) => new CommandParameterEntity(parameter),
+      );
+    }
+  }
 }

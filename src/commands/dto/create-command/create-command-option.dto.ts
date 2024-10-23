@@ -10,16 +10,17 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCommandParameterDto } from './create-command-parameter.dto';
+import { v4 as generateUuidV4 } from 'uuid';
 
 export class CreateCommandOptionDto {
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
   })
   @Type(() => String)
   @IsUUID()
-  @IsNotEmpty()
-  id: string;
+  @IsOptional()
+  id?: string;
 
   @ApiProperty({
     type: String,
@@ -84,4 +85,10 @@ export class CreateCommandOptionDto {
   @IsArray()
   @IsOptional()
   parameters?: CreateCommandParameterDto[] = [];
+
+  constructor() {
+    if (!this.id) {
+      this.id = generateUuidV4();
+    }
+  }
 }

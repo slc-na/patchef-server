@@ -9,7 +9,7 @@
 - **Export & Execute**: Export your script directly as a batch file, ready for execution on any system.
 
 # API Documentation
-PatChef API documentation is available at the ```/api``` route.
+PatChef API documentation is available at the ```/docs``` route.
 
 # Contribution Guidelines
 

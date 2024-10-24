@@ -1,30 +1,68 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# PatChef Server
+**PatChef** is a user-friendly batch script builder designed to simplify the creation and management of batch files. With an intuitive drag-and-drop interface, you can effortlessly organize commands and logic into a visual workflow, eliminating the need for manual scripting. This is the server counterpart of the PatChef Client module, that will be used as the server api of the PatChef services.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Key Features:
+- **Drag-and-Drop Commands**: Easily assemble commands from a pre-built library, organizing them in your preferred sequence.
+- **Interactive Command Management**: Modify, rearrange, and configure commands using a simple, interactive interface.
+- **Real-time Script Preview**: Instantly see the batch script generated from your command flow, allowing for easy tweaks.
+- **Custom Command Creation**: Define custom commands and reusable blocks tailored to your specific tasks.
+- **Export & Execute**: Export your script directly as a batch file, ready for execution on any system.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# API Documentation
+PatChef API documentation is available at the ```/api``` route.
 
-## Description
+# Contribution Guidelines
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Please follow these instructions to maintain consistency, quality, and strict adherence to TypeScript typing standards in the project. **All parameters, objects, and variables used must be properly typed**.
+
+## Prerequisites
+
+Before contributing, ensure you have the following installed:
+
+- **npm** (for managing dependencies)
+- **ESLint & Prettier** (linter and formatter) extension in VS Code
+
+## Code Editor Setup
+
+For a consistent development experience, set the following preferences:
+
+- **Enable format on save**
+- Set tab size to **2 spaces**
+
+## Naming Conventions
+
+To maintain readability and consistency in the codebase, adhere to the following naming conventions:
+
+### File Names
+- Use **kebab-case** for file names.
+  - Example: `example-file-name.tsx`
+
+## Folder Structure
+
+Organize files within the `src` directory as follows:
+This project follows Nest.js app structure and best practicees.
+
+## Branching
+
+Always create a new branch when contributing. Follow the branch naming conventions as outlined [here](https://medium.com/@abhay.pixolo/naming-conventions-for-git-branches-a-cheatsheet-8549feca2534).
+
+## Git Commit Messages
+
+We follow **semantic commit messages**. Learn more about the conventions from this [guide](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716).
+
+To commit please run ```npm run commit```
+
+### Semantic Commit Messages Tool
+
+To streamline your commit process, install the following tool to commit with semantic messages:  
+[git-cz](https://github.com/streamich/git-cz)
+
+Note: Please use ```git-cz --disable-emoji```, 
+I have come to realize that using emojis in commits is a God-level cringe, and should be avoided at all costs.
+
+---
+
+By following this guide, you help ensure the codebase remains clean, maintainable, and consistent across all contributions. Thank you for your contributions to PatChef!
 
 ## Project setup
 
@@ -40,6 +78,9 @@ $ npm run start
 
 # watch mode
 $ npm run start:dev
+
+# commit changes
+$ npm run commit
 
 # production mode
 $ npm run start:prod
@@ -57,29 +98,3 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).

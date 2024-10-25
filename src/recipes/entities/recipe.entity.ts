@@ -25,6 +25,20 @@ export class RecipeEntity implements Recipe {
   )
   commands?: CommandEntity[];
 
+  @ApiProperty({
+    type: Date,
+    required: true,
+  })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({
+    type: Date,
+    required: true,
+  })
+  @Expose()
+  updatedAt: Date;
+
   constructor({ commands, ...partial }: Partial<RecipeEntity>) {
     Object.assign(this, partial);
 

@@ -52,23 +52,27 @@ model Command {
   options     CommandOption[]
   parameters  CommandParameter[]
   recipes     CommandsInRecipe[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 }
 
 model Recipe {
-  id       String             @id @default(uuid())
-  name     String
-  commands CommandsInRecipe[]
+  id        String             @id @default(uuid())
+  name      String
+  commands  CommandsInRecipe[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
 }
 
 model CommandsInRecipe {
   order Int
 
   // Relations - Command
-  command   Command @relation(fields: [commandId], references: [id])
+  command   Command @relation(fields: [commandId], references: [id], onDelete: Cascade)
   commandId String
 
   // Relations - Recipe
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId String
 
   @@id([commandId, recipeId, order])

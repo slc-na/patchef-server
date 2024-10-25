@@ -56,6 +56,20 @@ export class CommandEntity implements Command {
   @Transform(({ value }) => (value && value.length === 0 ? undefined : value))
   parameters?: CommandParameterEntity[];
 
+  @ApiProperty({
+    type: Date,
+    required: true,
+  })
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty({
+    type: Date,
+    required: true,
+  })
+  @Expose()
+  updatedAt: Date;
+
   @Exclude()
   recipeId: string | null;
 

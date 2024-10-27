@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: patchef-server
+    image: DAFFODIL.ad.slc.net:5000/slc/patchef-server
     restart: always
     ports:
       - '4000:6970'

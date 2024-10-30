@@ -3,11 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: registry.kube.slc.net/slc/patchef-server
     container_name: patchef-server
-    image: DAFFODIL.ad.slc.net:5000/slc/patchef-server
     restart: always
     ports:
-      - '4000:6970'
+      - '6970:6970'
     depends_on:
       patchef-database:
         condition: service_healthy
@@ -18,7 +18,7 @@ services:
       - patchef-backend-network
 
   patchef-database:
-    image: postgres:14
+    image: postgres:latest
     container_name: patchef-database
     restart: always
     ports:
@@ -42,7 +42,5 @@ volumes:
 networks:
   patchef-frontend-network:
     driver: bridge
-    external: true
   patchef-backend-network:
     driver: bridge
-    external: true

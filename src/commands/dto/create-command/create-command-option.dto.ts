@@ -70,7 +70,6 @@ export class CreateCommandOptionDto {
     required: false,
   })
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   delimiter?: string;
 

@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaClientExceptionFilter, PrismaModule } from 'nestjs-prisma';
 import { CommandsModule } from './commands/commands.module';
 import { RecipesModule } from './recipes/recipes.module';
+import { environmentSchema } from './config/environment.schema';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      validationSchema: environmentSchema,
+    }),
     PrismaModule.forRoot({
       isGlobal: true,
     }),

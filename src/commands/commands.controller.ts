@@ -55,6 +55,28 @@ export class CommandsController {
     );
   }
 
+  @ApiBody({
+    type: CommandEntity,
+    isArray: true,
+  })
+  @ApiCreatedResponse({
+    type: CommandEntity,
+    isArray: true,
+    description: 'The command has been successfully created.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid command data',
+  })
+  @ApiConflictResponse({
+    description: 'Command already exists',
+  })
+  @Post('/bulk')
+  @HttpCode(HttpStatus.CREATED)
+  async createBulk(@Body() commandEntities: CommandEntity[]) {
+    const commands = await this.commandsService.createBulk(commandEntities);
+    return commands.map((command) => new CommandEntity(command));
+  }
+
   @ApiOkResponse({ type: CommandEntity, isArray: true })
   @Get()
   async findAll() {

@@ -29,7 +29,7 @@ export class RecipesService {
           });
         }
 
-        return prisma.recipe.findUnique({
+        return await prisma.recipe.findUnique({
           where: {
             id: createdRecipe.id,
           },

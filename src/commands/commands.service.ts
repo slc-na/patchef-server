@@ -3,6 +3,7 @@ import { CreateCommandDto } from './dto/create-command/create-command.dto';
 import { UpdateCommandDto } from './dto/update-command/update-command.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { Command } from '@prisma/client';
+import { CommandEntity } from './entities/command.entity';
 
 @Injectable()
 export class CommandsService {
@@ -23,7 +24,7 @@ export class CommandsService {
             originalId: commandData.id,
             parameters: {
               createMany: {
-                data: commandParameters ? commandParameters : [],
+                data: commandParameters ?? [],
               },
             },
           },
@@ -50,7 +51,7 @@ export class CommandsService {
           }
         }
 
-        return prisma.command.findUnique({
+        return await prisma.command.findUnique({
           where: {
             id: createdCommand.id,
           },
@@ -67,6 +68,73 @@ export class CommandsService {
     );
 
     return createdCommand;
+  }
+
+  async createBulk(commandEntities: CommandEntity[]) {
+    const commands = await this.prismaService.$transaction(async (prisma) => {
+      const commands = [];
+
+      for (const commandEntity of commandEntities) {
+        const {
+          options: commandOptions,
+          parameters: commandParameters,
+          ...commandData
+        } = commandEntity;
+
+        const createdCommand = await prisma.command.create({
+          data: {
+            ...commandData,
+            originalId: commandData.id,
+            parameters: {
+              createMany: {
+                data: commandParameters ?? [],
+              },
+            },
+          },
+        });
+
+        if (commandOptions) {
+          for (const commandOption of commandOptions) {
+            const {
+              parameters: commandOptionParameters,
+              ...commandOptionData
+            } = commandOption;
+
+            await prisma.commandOption.create({
+              data: {
+                ...commandOptionData,
+                commandId: createdCommand.id,
+                parameters: {
+                  createMany: {
+                    data: commandOptionParameters ?? [],
+                  },
+                },
+              },
+            });
+          }
+        }
+
+        const finalCreatedCommand = await prisma.command.findUnique({
+          where: {
+            id: createdCommand.id,
+          },
+          include: {
+            options: {
+              include: {
+                parameters: true,
+              },
+            },
+            parameters: true,
+          },
+        });
+
+        commands.push(finalCreatedCommand);
+      }
+
+      return commands;
+    });
+
+    return commands;
   }
 
   async findAll(): Promise<Command[]> {
@@ -150,7 +218,7 @@ export class CommandsService {
           }
         }
 
-        return prisma.command.findUnique({
+        return await prisma.command.findUnique({
           where: {
             id: updatedCommand.id,
           },

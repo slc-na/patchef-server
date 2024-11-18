@@ -44,7 +44,10 @@ async function bootstrap() {
     customfavIcon: './public/square-terminal.svg',
   });
 
-  await app.listen({ host: '0.0.0.0', port: 6970 });
+  await app.listen({
+    host: process.env.SERVER_HOST || '0.0.0.0',
+    port: Number.parseInt(process.env.SERVER_PORT ?? '') || 6970,
+  });
 }
 
 bootstrap();

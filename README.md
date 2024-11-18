@@ -1,5 +1,5 @@
 # PatChef Server
-**PatChef** is a user-friendly batch script builder designed to simplify the creation and management of batch files. With an intuitive drag-and-drop interface, you can effortlessly organize commands and logic into a visual workflow, eliminating the need for manual scripting. This is the server counterpart of the PatChef Client module, that will be used as the server api of the PatChef services.
+**PatChef** is a user-friendly batch script builder designed to simplify the creation and management of batch files. With an intuitive drag-and-drop interface, you can effortlessly organize commands and logic into a visual workflow, eliminating the need for manual scripting. This is the server counterpart of the [PatChef Client module](https://github.com/6ixB/patchef-client), that will be used as the server api of the PatChef services.
 
 ### Key Features:
 - **Drag-and-Drop Commands**: Easily assemble commands from a pre-built library, organizing them in your preferred sequence.

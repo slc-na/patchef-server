@@ -1,7 +1,11 @@
-import { Recipe } from '@prisma/client';
+import { Prisma, Recipe } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { CommandEntity } from 'src/commands/entities/command.entity';
+
+type CommandsInRecipeWithCommand = Prisma.CommandsInRecipeGetPayload<{
+  include: { command: true };
+}>;
 
 export class RecipeEntity implements Recipe {
   @ApiProperty({ type: String, required: true })
@@ -19,9 +23,12 @@ export class RecipeEntity implements Recipe {
   })
   @Expose()
   @Transform(({ value }) =>
-    value && value.length === 0
+    Array.isArray(value) && value.length === 0
       ? undefined
-      : value.map((commandRaw) => new CommandEntity(commandRaw.command)),
+      : value.map(
+          (commandRaw: CommandsInRecipeWithCommand) =>
+            new CommandEntity(commandRaw.command),
+        ),
   )
   commands?: CommandEntity[];
 

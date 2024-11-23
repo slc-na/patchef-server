@@ -1,6 +1,7 @@
-import { Type } from 'class-transformer';
-import { IsOptional, IsUUID } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsArray, IsOptional, IsUUID, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateCommandParameterDto } from 'src/commands/dto/create-command/create-command-parameter.dto';
 
 export class CreateRecipeCommandDto {
   @ApiProperty({
@@ -11,4 +12,19 @@ export class CreateRecipeCommandDto {
   @IsUUID()
   @IsOptional()
   originalId: string;
+
+  @ApiProperty({
+    type: CreateCommandParameterDto,
+    isArray: true,
+    required: false,
+    default: [],
+  })
+  @Type(() => CreateCommandParameterDto)
+  @ValidateNested({ each: true })
+  @IsArray()
+  @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value) && value.length === 0 ? undefined : value,
+  )
+  parameters?: CreateCommandParameterDto[];
 }

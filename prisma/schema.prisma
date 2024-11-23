@@ -23,8 +23,11 @@ model CommandParameter {
   commandOptionId String?
 
   // Relations - Command
-  Command   Command? @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  Command   Command? @relation(fields: [commandId], references: [originalId], onDelete: Cascade)
   commandId String?
+
+  // Relations - CommandParameterPayloadsInRecipe
+  CommandParameterPayloadsInRecipe CommandParameterPayloadsInRecipe[]
 }
 
 model CommandOption {
@@ -38,13 +41,13 @@ model CommandOption {
   parameters        CommandParameter[]
 
   // Relations - Command
-  Command   Command? @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  Command   Command? @relation(fields: [commandId], references: [originalId], onDelete: Cascade)
   commandId String?
 }
 
 model Command {
-  id          String             @id @default(uuid())
-  originalId  String
+  id          String
+  originalId  String             @id @default(uuid())
   type        CommandType
   name        String
   description String
@@ -65,10 +68,11 @@ model Recipe {
 }
 
 model CommandsInRecipe {
-  order Int
+  order    Int
+  payloads CommandParameterPayloadsInRecipe[]
 
   // Relations - Command
-  command   Command @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  command   Command @relation(fields: [commandId], references: [originalId], onDelete: Cascade)
   commandId String
 
   // Relations - Recipe
@@ -76,4 +80,20 @@ model CommandsInRecipe {
   recipeId String
 
   @@id([commandId, recipeId, order])
+}
+
+model CommandParameterPayloadsInRecipe {
+  payload String
+
+  // Relations - CommandParameter
+  CommandParameter   CommandParameter @relation(fields: [commandParameterId], references: [id], onDelete: Cascade)
+  commandParameterId String
+
+  // Relations - CommandsInRecipe
+  CommandsInRecipe          CommandsInRecipe @relation(fields: [commandsInRecipeCommandId, commandsInRecipeRecipeId, commandsInRecipeOrder], references: [commandId, recipeId, order], onDelete: Cascade)
+  commandsInRecipeCommandId String
+  commandsInRecipeRecipeId  String
+  commandsInRecipeOrder     Int
+
+  @@id([commandParameterId, commandsInRecipeCommandId, commandsInRecipeRecipeId, commandsInRecipeOrder])
 }

@@ -60,7 +60,9 @@ export class CommandOptionEntity implements CommandOption {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => (value && value.length === 0 ? undefined : value))
+  @Transform(({ value }) =>
+    Array.isArray(value) && value.length === 0 ? undefined : value,
+  )
   parameters?: CommandParameterEntity[];
 
   @Exclude()

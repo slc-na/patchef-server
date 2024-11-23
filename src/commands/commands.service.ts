@@ -21,6 +21,7 @@ export class CommandsService {
         const createdCommand = await prisma.command.create({
           data: {
             ...commandData,
+            id: commandData.id,
             originalId: commandData.id,
             parameters: {
               createMany: {
@@ -53,7 +54,7 @@ export class CommandsService {
 
         return await prisma.command.findUnique({
           where: {
-            id: createdCommand.id,
+            originalId: createdCommand.originalId,
           },
           include: {
             options: {
@@ -116,7 +117,7 @@ export class CommandsService {
 
         const finalCreatedCommand = await prisma.command.findUnique({
           where: {
-            id: createdCommand.id,
+            originalId: createdCommand.originalId,
           },
           include: {
             options: {
@@ -153,7 +154,7 @@ export class CommandsService {
   async findOne(id: string): Promise<Command> {
     return await this.prismaService.command.findUnique({
       where: {
-        id,
+        originalId: id,
       },
       include: {
         options: true,
@@ -175,7 +176,7 @@ export class CommandsService {
     const updatedCommand = await this.prismaService.$transaction(
       async (prisma) => {
         const updatedCommand = await prisma.command.update({
-          where: { id },
+          where: { originalId: id },
           data: {
             ...commandData,
             parameters: {
@@ -220,7 +221,7 @@ export class CommandsService {
 
         return await prisma.command.findUnique({
           where: {
-            id: updatedCommand.id,
+            originalId: updatedCommand.originalId,
           },
           include: {
             options: {
@@ -239,7 +240,7 @@ export class CommandsService {
 
   async remove(id: string): Promise<Command> {
     return await this.prismaService.command.delete({
-      where: { id },
+      where: { originalId: id },
       include: {
         options: {
           include: {

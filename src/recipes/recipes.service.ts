@@ -137,30 +137,63 @@ export class RecipesService {
   }
 
   async findOne(id: string): Promise<Recipe> {
-    return await this.prismaService.recipe.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        commands: {
-          orderBy: {
-            order: 'asc',
-          },
-          include: {
-            command: {
-              include: {
-                options: {
-                  include: {
-                    parameters: true,
+    const recipe = await this.prismaService.$transaction(async (prisma) => {
+      const recipe = await prisma.recipe.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          commands: {
+            orderBy: {
+              order: 'asc',
+            },
+            include: {
+              command: {
+                include: {
+                  options: {
+                    include: {
+                      parameters: true,
+                    },
                   },
+                  parameters: true,
                 },
-                parameters: true,
               },
             },
           },
         },
-      },
+      });
+
+      const recipeCommandPayloads =
+        await prisma.commandParameterPayloadsInRecipe.findMany({
+          where: {
+            commandsInRecipeRecipeId: id,
+          },
+        });
+
+      const commands = recipe.commands.map((command, index) => {
+        const commandPayloads = recipeCommandPayloads.filter(
+          (commandPayload) => {
+            return (
+              commandPayload.commandsInRecipeCommandId === command.commandId &&
+              commandPayload.commandsInRecipeRecipeId === recipe.id &&
+              commandPayload.commandsInRecipeOrder === index
+            );
+          },
+        );
+
+        return {
+          ...command,
+          command: new RecipeCommandEntity(command.command, commandPayloads),
+        };
+      });
+
+      return {
+        ...recipe,
+        commands,
+      };
     });
+
+    return recipe;
   }
 
   async update(id: string, updateRecipeDto: UpdateRecipeDto): Promise<Recipe> {

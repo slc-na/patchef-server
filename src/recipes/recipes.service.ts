@@ -118,6 +118,10 @@ export class RecipesService {
             },
           );
 
+          if (commandPayloads.length === 0) {
+            return command;
+          }
+
           return {
             ...command,
             command: new RecipeCommandEntity(command.command, commandPayloads),

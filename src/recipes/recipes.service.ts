@@ -31,20 +31,35 @@ export class RecipesService {
             },
           });
 
-          if (!recipeCommand.parameters) {
-            continue;
+          if (recipeCommand.parameters) {
+            for (const recipeCommandParameter of recipeCommand.parameters) {
+              await prisma.commandParameterPayloadsInRecipe.create({
+                data: {
+                  payload: recipeCommandParameter.payload,
+                  commandParameterId: recipeCommandParameter.id,
+                  commandsInRecipeOrder: i,
+                  commandsInRecipeCommandId: recipeCommand.originalId,
+                  commandsInRecipeRecipeId: createdRecipe.id,
+                },
+              });
+            }
           }
 
-          for (const recipeCommandParameter of recipeCommand.parameters) {
-            await prisma.commandParameterPayloadsInRecipe.create({
-              data: {
-                payload: recipeCommandParameter.payload,
-                commandParameterId: recipeCommandParameter.id,
-                commandsInRecipeOrder: i,
-                commandsInRecipeCommandId: recipeCommand.originalId,
-                commandsInRecipeRecipeId: createdRecipe.id,
-              },
-            });
+          if (recipeCommand.options) {
+            for (const recipeCommandOption of recipeCommand.options) {
+              for (const recipeCommandOptionParameter of recipeCommandOption.parameters) {
+                await prisma.commandOptionParameterPayloadsInRecipe.create({
+                  data: {
+                    payload: recipeCommandOptionParameter.payload,
+                    commandParameterId: recipeCommandOptionParameter.id,
+                    commandOptionId: recipeCommandOption.id,
+                    commandsInRecipeOrder: i,
+                    commandsInRecipeCommandId: recipeCommand.originalId,
+                    commandsInRecipeRecipeId: createdRecipe.id,
+                  },
+                });
+              }
+            }
           }
         }
 
@@ -102,29 +117,50 @@ export class RecipesService {
         },
       });
 
-      const recipeCommandPayloads =
+      const recipeCommandParameterPayloads =
         await prisma.commandParameterPayloadsInRecipe.findMany();
+
+      const recipeCommandOptionPayloads =
+        await prisma.commandOptionParameterPayloadsInRecipe.findMany();
 
       const recipesWithPayloads = recipes.map((recipe) => {
         const commands = recipe.commands.map((command, index) => {
-          const commandPayloads = recipeCommandPayloads.filter(
-            (commandPayload) => {
+          const commandParameterPayloads =
+            recipeCommandParameterPayloads.filter((commandParameterPayload) => {
               return (
-                commandPayload.commandsInRecipeCommandId ===
+                commandParameterPayload.commandsInRecipeCommandId ===
                   command.commandId &&
-                commandPayload.commandsInRecipeRecipeId === recipe.id &&
-                commandPayload.commandsInRecipeOrder === index
+                commandParameterPayload.commandsInRecipeRecipeId ===
+                  recipe.id &&
+                commandParameterPayload.commandsInRecipeOrder === index
+              );
+            });
+
+          const commandOptionPayloads = recipeCommandOptionPayloads.filter(
+            (commandOptionPayload) => {
+              return (
+                commandOptionPayload.commandsInRecipeCommandId ===
+                  command.commandId &&
+                commandOptionPayload.commandsInRecipeRecipeId === recipe.id &&
+                commandOptionPayload.commandsInRecipeOrder === index
               );
             },
           );
 
-          if (commandPayloads.length === 0) {
+          if (
+            commandParameterPayloads.length === 0 &&
+            commandOptionPayloads.length === 0
+          ) {
             return command;
           }
 
           return {
             ...command,
-            command: new RecipeCommandEntity(command.command, commandPayloads),
+            command: new RecipeCommandEntity(
+              command.command,
+              commandParameterPayloads,
+              commandOptionPayloads,
+            ),
           };
         });
 
@@ -167,15 +203,22 @@ export class RecipesService {
         },
       });
 
-      const recipeCommandPayloads =
+      const recipeCommandParameterPayloads =
         await prisma.commandParameterPayloadsInRecipe.findMany({
           where: {
             commandsInRecipeRecipeId: id,
           },
         });
 
+      const recipeCommandOptionPayloads =
+        await prisma.commandOptionParameterPayloadsInRecipe.findMany({
+          where: {
+            commandsInRecipeRecipeId: id,
+          },
+        });
+
       const commands = recipe.commands.map((command, index) => {
-        const commandPayloads = recipeCommandPayloads.filter(
+        const commandParameterPayloads = recipeCommandParameterPayloads.filter(
           (commandPayload) => {
             return (
               commandPayload.commandsInRecipeCommandId === command.commandId &&
@@ -185,9 +228,24 @@ export class RecipesService {
           },
         );
 
+        const commandOptionPayloads = recipeCommandOptionPayloads.filter(
+          (commandOptionPayload) => {
+            return (
+              commandOptionPayload.commandsInRecipeCommandId ===
+                command.commandId &&
+              commandOptionPayload.commandsInRecipeRecipeId === recipe.id &&
+              commandOptionPayload.commandsInRecipeOrder === index
+            );
+          },
+        );
+
         return {
           ...command,
-          command: new RecipeCommandEntity(command.command, commandPayloads),
+          command: new RecipeCommandEntity(
+            command.command,
+            commandParameterPayloads,
+            commandOptionPayloads,
+          ),
         };
       });
 

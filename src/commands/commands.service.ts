@@ -4,9 +4,14 @@ import { UpdateCommandDto } from './dto/update-command/update-command.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { Command } from '@prisma/client';
 import { CommandEntity } from './entities/command.entity';
-
+import { UploadCommandDTO } from './dto/create-command/upload-command.dto';
+import * as fs from 'fs';
+import * as path from 'path';
+import { exec } from 'child_process';
 @Injectable()
 export class CommandsService {
+  private readonly remoteServer = `${process.env.ZOU_URL}\Public`;
+  private readonly localTempPath = path.join(__dirname, '..', 'temp'); // Local temp storage before SCP
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createCommandDto: CreateCommandDto): Promise<Command> {
@@ -71,6 +76,62 @@ export class CommandsService {
     return createdCommand;
   }
 
+  async uploadCommand(
+    uploadCommandDTO: UploadCommandDTO,
+  ): Promise<{ message: string; filePath: string }> {
+    try {
+      const { folderName, commands } = uploadCommandDTO;
+
+      if (!fs.existsSync(this.localTempPath)) {
+        fs.mkdirSync(this.localTempPath, { recursive: true });
+      }
+
+      const batchFileName = 'main.bat';
+      const localFilePath = path.join(this.localTempPath, batchFileName);
+      const batchContent = commands.join('\r\n');
+      const academicYear = this.getAcademicYear();
+      fs.writeFileSync(localFilePath, batchContent);
+      console.log(`Batch file created at: ${localFilePath}`);
+
+      const networkPath = `\\\\10.22.64.20\\Public\\${academicYear}\\${folderName}\\`;
+
+      const mkdirCommand = `mkdir "${networkPath.substring(0, networkPath.lastIndexOf('\\'))}"`;
+
+      return new Promise((resolve, reject) => {
+        exec(mkdirCommand, (mkdirError) => {
+          if (mkdirError) {
+            console.error('Failed to create directory:', mkdirError.message);
+            reject({
+              error: 'Failed to create target directory',
+              details: mkdirError.message,
+            });
+            return;
+          }
+          const copyCommand = `xcopy /Y "${localFilePath}" "${networkPath}"`;
+
+          exec(copyCommand, (copyError, stdout, stderr) => {
+            if (copyError) {
+              console.error('Copy Transfer Failed:', copyError.message);
+              reject({
+                error: 'Failed to transfer batch file',
+                details: copyError.message,
+              });
+            } else {
+              console.log('Copy Transfer Output:', stdout);
+              console.error('Copy Transfer Errors:', stderr);
+              resolve({
+                message: 'Batch file uploaded and transferred successfully',
+                filePath: networkPath,
+              });
+            }
+          });
+        });
+      });
+    } catch (error) {
+      console.error('Error in uploadCommand:', error);
+      throw new Error('Failed to process batch file');
+    }
+  }
   async createBulk(commandEntities: CommandEntity[]) {
     const commands = await this.prismaService.$transaction(async (prisma) => {
       const commands = [];
@@ -250,5 +311,16 @@ export class CommandsService {
         parameters: true,
       },
     });
+  }
+  getAcademicYear(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // Months are 0-based in JavaScript
+
+    // If it's August (8) or later, the academic year starts this year
+    const startYear = month >= 8 ? year : year - 1;
+    const endYear = startYear + 1;
+
+    return `${startYear.toString().slice(-2)}${endYear.toString().slice(-2)}`;
   }
 }

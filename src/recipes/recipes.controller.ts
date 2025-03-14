@@ -25,6 +25,7 @@ import {
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { PublishRecipeDto } from './dto/publish-recipe.dto';
 import { RecipeEntity } from './entities/recipe.entity';
 
 @ApiTags('recipes')
@@ -55,6 +56,7 @@ export class RecipesController {
 
   @ApiOkResponse({ type: RecipeEntity, isArray: true })
   @Get()
+  @HttpCode(HttpStatus.OK)
   async findAll() {
     const recipes = await this.recipesService.findAll();
     return recipes.map((recipe) => new RecipeEntity(recipe));
@@ -65,6 +67,7 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string) {
     return new RecipeEntity(await this.recipesService.findOne(id));
   }
@@ -77,6 +80,7 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
     @Body() updateRecipeDto: UpdateRecipeDto,
@@ -91,7 +95,24 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string) {
     return new RecipeEntity(await this.recipesService.remove(id));
+  }
+
+  @ApiBody({
+    type: PublishRecipeDto,
+  })
+  @ApiCreatedResponse({
+    type: RecipeEntity,
+    description: 'The recipe has been successfully published.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid recipe data',
+  })
+  @Post('/publish')
+  @HttpCode(HttpStatus.CREATED)
+  async publishRecipe(@Body() publishRecipeDto: PublishRecipeDto) {
+    return await this.recipesService.publishRecipe(publishRecipeDto);
   }
 }

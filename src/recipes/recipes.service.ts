@@ -1,13 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { PrismaService } from 'nestjs-prisma';
+import { PublishRecipeDto } from './dto/publish-recipe.dto';
 import { Recipe } from '@prisma/client';
 import { RecipeCommandEntity } from './entities/recipe-command.entity';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'nestjs-prisma';
+import path from 'path';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { exec } from 'child_process';
 
 @Injectable()
 export class RecipesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly logger = new Logger(RecipesService.name);
+
+  private readonly recipeRepositoryDirectory = `${this.configService.get<string>('RECIPE_REPOSITORY_SERVER_URL')}`;
+  private readonly localTempPath = path.join(__dirname, '..', 'temp');
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   async create(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
     const createdRecipe = await this.prismaService.$transaction(
@@ -350,5 +363,75 @@ export class RecipesService {
     );
 
     return removedRecipe;
+  }
+
+  getAcademicYear(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const startYear = month >= 8 ? year : year - 1;
+    const endYear = startYear + 1;
+
+    return `${startYear.toString().slice(-2)}${endYear.toString().slice(-2)}`;
+  }
+
+  async publishRecipe(
+    publishRecipeDto: PublishRecipeDto,
+  ): Promise<{ message: string; filePath: string }> {
+    try {
+      const { directoryName, fileName, commands } = publishRecipeDto;
+
+      if (!existsSync(this.localTempPath)) {
+        mkdirSync(this.localTempPath, { recursive: true });
+      }
+
+      const localFilePath = path.join(this.localTempPath, fileName);
+      const batchContent = commands.join('\r\n');
+      const academicYear = this.getAcademicYear();
+      writeFileSync(localFilePath, batchContent);
+      this.logger.log(`Batch file created at: ${localFilePath}`);
+
+      const networkPath = `${this.recipeRepositoryDirectory}\\${academicYear}\\${directoryName}`;
+      const mkdirCommand = `mkdir "${networkPath.substring(0, networkPath.lastIndexOf('\\'))}"`;
+
+      return new Promise((resolve, reject) => {
+        exec(mkdirCommand, (mkdirError) => {
+          if (mkdirError) {
+            this.logger.error(
+              'Failed to create directory:',
+              mkdirError.message,
+            );
+            reject({
+              error: 'Failed to create target directory',
+              details: mkdirError.message,
+            });
+            return;
+          }
+
+          const copyCommand = `xcopy /Y "${localFilePath}" "${networkPath}"`;
+
+          exec(copyCommand, (copyError, stdout, stderr) => {
+            if (copyError) {
+              this.logger.error('Copy Transfer Failed:', copyError.message);
+              reject({
+                error: 'Failed to transfer batch file',
+                details: copyError.message,
+              });
+            } else {
+              this.logger.log('Copy Transfer Output:', stdout);
+              this.logger.error('Copy Transfer Errors:', stderr);
+              resolve({
+                message: 'Batch script file published successfully',
+                filePath: networkPath,
+              });
+            }
+          });
+        });
+      });
+    } catch (error) {
+      this.logger.error('Error in publishRecipe:', error);
+      throw new Error('Something went wrong while publishing the recipe');
+    }
   }
 }

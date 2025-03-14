@@ -26,7 +26,6 @@ import { CommandsService } from './commands.service';
 import { CreateCommandDto } from './dto/create-command/create-command.dto';
 import { UpdateCommandDto } from './dto/update-command/update-command.dto';
 import { CommandEntity } from './entities/command.entity';
-import { UploadCommandDTO } from './dto/create-command/upload-command.dto';
 
 @ApiTags('commands')
 @Controller('commands')
@@ -80,20 +79,18 @@ export class CommandsController {
 
   @ApiOkResponse({ type: CommandEntity, isArray: true })
   @Get()
+  @HttpCode(HttpStatus.OK)
   async findAll() {
     const commands = await this.commandsService.findAll();
     return commands.map((command) => new CommandEntity(command));
   }
-  @Post('/server')
-  @HttpCode(HttpStatus.CREATED)
-  async uploadCommand(@Body() UploadCommandDTO: UploadCommandDTO) {
-    return await this.commandsService.uploadCommand(UploadCommandDTO);
-  }
+
   @ApiOkResponse({ type: CommandEntity })
   @ApiNotFoundResponse({
     description: 'Command not found',
   })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string) {
     return new CommandEntity(await this.commandsService.findOne(id));
   }
@@ -106,6 +103,7 @@ export class CommandsController {
     description: 'Command not found',
   })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
     @Body() updateCommandDto: UpdateCommandDto,
@@ -120,6 +118,7 @@ export class CommandsController {
     description: 'Command not found',
   })
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string) {
     return new CommandEntity(await this.commandsService.remove(id));
   }

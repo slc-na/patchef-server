@@ -16,7 +16,7 @@ export const environmentSchema = Joi.object({
   POSTGRES_DB: Joi.string().default('patchef'),
 
   // Prisma Configuration
-  DATABASE_URL: Joi.string().uri(),
+  DATABASE_URL: Joi.string(),
 
   // Client Configuration
   CLIENT_URL: Joi.string().uri(),

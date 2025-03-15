@@ -4,10 +4,14 @@ import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { PublishRecipeDto } from './dto/publish-recipe.dto';
 import { Recipe } from '@prisma/client';
 import { RecipeCommandEntity } from './entities/recipe-command.entity';
+import {
+  PublishedRecipeEntity,
+  PublishedRecipeErrorCode,
+} from './entities/published-recipe.entity';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'nestjs-prisma';
 import path from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { promises as fs } from 'fs';
 import { exec } from 'child_process';
 
 @Injectable()
@@ -378,60 +382,67 @@ export class RecipesService {
 
   async publishRecipe(
     publishRecipeDto: PublishRecipeDto,
-  ): Promise<{ message: string; filePath: string }> {
+  ): Promise<PublishedRecipeEntity> {
+    const { directoryName, fileName, overwrite, commands } = publishRecipeDto;
+
+    const localTempDirPath = `${this.localTempPath}\\${directoryName}`;
+    const localFilePath = path.join(localTempDirPath, fileName);
+
+    const batchContent = commands.join('\r\n');
+
+    const academicYear = this.getAcademicYear();
+    const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}\\${academicYear}\\${directoryName}\\`;
+    const remoteRepositoryFilePath = path.join(
+      remoteRepositorykDirPath,
+      fileName,
+    );
+
     try {
-      const { directoryName, fileName, commands } = publishRecipeDto;
-
-      if (!existsSync(this.localTempPath)) {
-        mkdirSync(this.localTempPath, { recursive: true });
-      }
-
-      const localFilePath = path.join(this.localTempPath, fileName);
-      const batchContent = commands.join('\r\n');
-      const academicYear = this.getAcademicYear();
-      writeFileSync(localFilePath, batchContent);
-      this.logger.log(`Batch file created at: ${localFilePath}`);
-
-      const networkPath = `${this.recipeRepositoryDirectory}\\${academicYear}\\${directoryName}`;
-      const mkdirCommand = `mkdir "${networkPath.substring(0, networkPath.lastIndexOf('\\'))}"`;
-
-      return new Promise((resolve, reject) => {
-        exec(mkdirCommand, (mkdirError) => {
-          if (mkdirError) {
-            this.logger.error(
-              'Failed to create directory:',
-              mkdirError.message,
-            );
-            reject({
-              error: 'Failed to create target directory',
-              details: mkdirError.message,
-            });
-            return;
-          }
-
-          const copyCommand = `xcopy /Y "${localFilePath}" "${networkPath}"`;
-
-          exec(copyCommand, (copyError, stdout, stderr) => {
-            if (copyError) {
-              this.logger.error('Copy Transfer Failed:', copyError.message);
-              reject({
-                error: 'Failed to transfer batch file',
-                details: copyError.message,
-              });
-            } else {
-              this.logger.log('Copy Transfer Output:', stdout);
-              this.logger.error('Copy Transfer Errors:', stderr);
-              resolve({
-                message: 'Batch script file published successfully',
-                filePath: networkPath,
-              });
-            }
-          });
-        });
-      });
+      await fs.access(localTempDirPath);
     } catch (error) {
-      this.logger.error('Error in publishRecipe:', error);
-      throw new Error('Something went wrong while publishing the recipe');
+      await fs.mkdir(localTempDirPath, { recursive: true });
+    }
+
+    await fs.writeFile(localFilePath, batchContent);
+
+    // If overwrite is not allowed, check if file already exists in remote repository
+    if (!overwrite) {
+      // Check if file already exists in remote repository location
+      try {
+        await fs.access(remoteRepositoryFilePath);
+        this.logger.warn(`File already exists: ${remoteRepositoryFilePath}`);
+        return {
+          status: 'failed',
+          errorCode: PublishedRecipeErrorCode.FileExists,
+          errorDescription: 'File already exists!',
+          filePath: remoteRepositoryFilePath,
+        };
+      } catch {
+        // File does not exist, continue with copying
+      }
+    }
+
+    try {
+      const copyCommand =
+        process.platform === 'win32'
+          ? `xcopy "${localTempDirPath}" "${remoteRepositorykDirPath}" /E /I /Q /Y`
+          : `cp -r "${localTempDirPath}" "${remoteRepositorykDirPath}"`;
+
+      await new Promise((resolve, reject) => {
+        exec(copyCommand, (error) => (error ? reject(error) : resolve(null)));
+      });
+
+      await fs.rm(localTempDirPath, { recursive: true, force: true });
+
+      return { status: 'success', filePath: remoteRepositoryFilePath };
+    } catch (error) {
+      this.logger.error('File transfer failed:', error);
+      return {
+        status: 'failed',
+        errorCode: PublishedRecipeErrorCode.FileTransferError,
+        errorDescription: error,
+        filePath: null,
+      };
     }
   }
 }

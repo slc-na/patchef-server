@@ -49,7 +49,9 @@ export class CommandsController {
   })
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCommandDto: CreateCommandDto) {
+  async create(
+    @Body() createCommandDto: CreateCommandDto,
+  ): Promise<CommandEntity> {
     return new CommandEntity(
       await this.commandsService.create(createCommandDto),
     );
@@ -72,7 +74,9 @@ export class CommandsController {
   })
   @Post('/bulk')
   @HttpCode(HttpStatus.CREATED)
-  async createBulk(@Body() commandEntities: CommandEntity[]) {
+  async createBulk(
+    @Body() commandEntities: CommandEntity[],
+  ): Promise<CommandEntity[]> {
     const commands = await this.commandsService.createBulk(commandEntities);
     return commands.map((command) => new CommandEntity(command));
   }
@@ -80,7 +84,7 @@ export class CommandsController {
   @ApiOkResponse({ type: CommandEntity, isArray: true })
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll() {
+  async findAll(): Promise<CommandEntity[]> {
     const commands = await this.commandsService.findAll();
     return commands.map((command) => new CommandEntity(command));
   }
@@ -91,7 +95,7 @@ export class CommandsController {
   })
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<CommandEntity> {
     return new CommandEntity(await this.commandsService.findOne(id));
   }
 
@@ -107,7 +111,7 @@ export class CommandsController {
   async update(
     @Param('id') id: string,
     @Body() updateCommandDto: UpdateCommandDto,
-  ) {
+  ): Promise<CommandEntity> {
     return new CommandEntity(
       await this.commandsService.update(id, updateCommandDto),
     );
@@ -119,7 +123,7 @@ export class CommandsController {
   })
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<CommandEntity> {
     return new CommandEntity(await this.commandsService.remove(id));
   }
 }

@@ -1,4 +1,11 @@
-import { IsString, IsArray, ArrayNotEmpty, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  ArrayNotEmpty,
+  IsNotEmpty,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -20,6 +27,15 @@ export class PublishRecipeDto {
   @IsString()
   @IsNotEmpty()
   fileName: string;
+
+  @ApiProperty({
+    description: 'Overwrite the existing file',
+    example: true,
+  })
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  overwrite?: boolean;
 
   @ApiProperty({
     description: 'Array of batch script commands',

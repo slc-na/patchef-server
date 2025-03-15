@@ -25,7 +25,9 @@ import {
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { PublishRecipeDto } from './dto/publish-recipe.dto';
 import { RecipeEntity } from './entities/recipe.entity';
+import { PublishedRecipeEntity } from './entities/published-recipe.entity';
 
 @ApiTags('recipes')
 @Controller('recipes')
@@ -49,13 +51,16 @@ export class RecipesController {
   })
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createRecipeDto: CreateRecipeDto) {
+  async create(
+    @Body() createRecipeDto: CreateRecipeDto,
+  ): Promise<RecipeEntity> {
     return new RecipeEntity(await this.recipesService.create(createRecipeDto));
   }
 
   @ApiOkResponse({ type: RecipeEntity, isArray: true })
   @Get()
-  async findAll() {
+  @HttpCode(HttpStatus.OK)
+  async findAll(): Promise<RecipeEntity[]> {
     const recipes = await this.recipesService.findAll();
     return recipes.map((recipe) => new RecipeEntity(recipe));
   }
@@ -65,7 +70,8 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: string): Promise<RecipeEntity> {
     return new RecipeEntity(await this.recipesService.findOne(id));
   }
 
@@ -77,10 +83,11 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
     @Body() updateRecipeDto: UpdateRecipeDto,
-  ) {
+  ): Promise<RecipeEntity> {
     return new RecipeEntity(
       await this.recipesService.update(id, updateRecipeDto),
     );
@@ -91,7 +98,26 @@ export class RecipesController {
     description: 'Recipe not found',
   })
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  @HttpCode(HttpStatus.OK)
+  async remove(@Param('id') id: string): Promise<RecipeEntity> {
     return new RecipeEntity(await this.recipesService.remove(id));
+  }
+
+  @ApiBody({
+    type: PublishRecipeDto,
+  })
+  @ApiCreatedResponse({
+    type: PublishedRecipeEntity,
+    description: 'The recipe has been successfully published.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid recipe data',
+  })
+  @Post('/publish')
+  @HttpCode(HttpStatus.CREATED)
+  async publishRecipe(
+    @Body() publishRecipeDto: PublishRecipeDto,
+  ): Promise<PublishedRecipeEntity> {
+    return await this.recipesService.publishRecipe(publishRecipeDto);
   }
 }

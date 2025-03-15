@@ -71,7 +71,7 @@ export class CommandsService {
     return createdCommand;
   }
 
-  async createBulk(commandEntities: CommandEntity[]) {
+  async createBulk(commandEntities: CommandEntity[]): Promise<Command[]> {
     const commands = await this.prismaService.$transaction(async (prisma) => {
       const commands = [];
 

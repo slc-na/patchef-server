@@ -49,7 +49,9 @@ export class CommandsController {
   })
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCommandDto: CreateCommandDto) {
+  async create(
+    @Body() createCommandDto: CreateCommandDto,
+  ): Promise<CommandEntity> {
     return new CommandEntity(
       await this.commandsService.create(createCommandDto),
     );
@@ -72,14 +74,17 @@ export class CommandsController {
   })
   @Post('/bulk')
   @HttpCode(HttpStatus.CREATED)
-  async createBulk(@Body() commandEntities: CommandEntity[]) {
+  async createBulk(
+    @Body() commandEntities: CommandEntity[],
+  ): Promise<CommandEntity[]> {
     const commands = await this.commandsService.createBulk(commandEntities);
     return commands.map((command) => new CommandEntity(command));
   }
 
   @ApiOkResponse({ type: CommandEntity, isArray: true })
   @Get()
-  async findAll() {
+  @HttpCode(HttpStatus.OK)
+  async findAll(): Promise<CommandEntity[]> {
     const commands = await this.commandsService.findAll();
     return commands.map((command) => new CommandEntity(command));
   }
@@ -89,7 +94,8 @@ export class CommandsController {
     description: 'Command not found',
   })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: string): Promise<CommandEntity> {
     return new CommandEntity(await this.commandsService.findOne(id));
   }
 
@@ -101,10 +107,11 @@ export class CommandsController {
     description: 'Command not found',
   })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
     @Body() updateCommandDto: UpdateCommandDto,
-  ) {
+  ): Promise<CommandEntity> {
     return new CommandEntity(
       await this.commandsService.update(id, updateCommandDto),
     );
@@ -115,7 +122,8 @@ export class CommandsController {
     description: 'Command not found',
   })
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  @HttpCode(HttpStatus.OK)
+  async remove(@Param('id') id: string): Promise<CommandEntity> {
     return new CommandEntity(await this.commandsService.remove(id));
   }
 }

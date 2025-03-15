@@ -5,11 +5,14 @@ import { PrismaClientExceptionFilter, PrismaModule } from 'nestjs-prisma';
 import { CommandsModule } from './commands/commands.module';
 import { RecipesModule } from './recipes/recipes.module';
 import { environmentSchema } from './config/environment.schema';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      load: [configuration],
       validationSchema: environmentSchema,
+      isGlobal: true,
     }),
     PrismaModule.forRoot({
       isGlobal: true,

@@ -1,13 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { PrismaService } from 'nestjs-prisma';
+import { PublishRecipeDto } from './dto/publish-recipe.dto';
 import { Recipe } from '@prisma/client';
 import { RecipeCommandEntity } from './entities/recipe-command.entity';
+import {
+  PublishedRecipeEntity,
+  PublishedRecipeErrorCode,
+} from './entities/published-recipe.entity';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'nestjs-prisma';
+import path from 'path';
+import { promises as fs } from 'fs';
+import { exec } from 'child_process';
 
 @Injectable()
 export class RecipesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly logger = new Logger(RecipesService.name);
+
+  private readonly recipeRepositoryDirectory = `${this.configService.get<string>('RECIPE_REPOSITORY_SERVER_URL')}`;
+  private readonly localTempPath = path.join(__dirname, '..', 'temp');
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   async create(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
     const createdRecipe = await this.prismaService.$transaction(
@@ -350,5 +367,82 @@ export class RecipesService {
     );
 
     return removedRecipe;
+  }
+
+  getAcademicYear(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const startYear = month >= 8 ? year : year - 1;
+    const endYear = startYear + 1;
+
+    return `${startYear.toString().slice(-2)}${endYear.toString().slice(-2)}`;
+  }
+
+  async publishRecipe(
+    publishRecipeDto: PublishRecipeDto,
+  ): Promise<PublishedRecipeEntity> {
+    const { directoryName, fileName, overwrite, commands } = publishRecipeDto;
+
+    const localTempDirPath = `${this.localTempPath}\\${directoryName}`;
+    const localFilePath = path.join(localTempDirPath, fileName);
+
+    const batchContent = commands.join('\r\n');
+
+    const academicYear = this.getAcademicYear();
+    const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}\\${academicYear}\\${directoryName}\\`;
+    const remoteRepositoryFilePath = path.join(
+      remoteRepositorykDirPath,
+      fileName,
+    );
+
+    try {
+      await fs.access(localTempDirPath);
+    } catch (error) {
+      await fs.mkdir(localTempDirPath, { recursive: true });
+    }
+
+    await fs.writeFile(localFilePath, batchContent);
+
+    // If overwrite is not allowed, check if file already exists in remote repository
+    if (!overwrite) {
+      // Check if file already exists in remote repository location
+      try {
+        await fs.access(remoteRepositoryFilePath);
+        this.logger.warn(`File already exists: ${remoteRepositoryFilePath}`);
+        return {
+          status: 'failed',
+          errorCode: PublishedRecipeErrorCode.FileExists,
+          errorDescription: 'File already exists!',
+          filePath: remoteRepositoryFilePath,
+        };
+      } catch {
+        // File does not exist, continue with copying
+      }
+    }
+
+    try {
+      const copyCommand =
+        process.platform === 'win32'
+          ? `xcopy "${localTempDirPath}" "${remoteRepositorykDirPath}" /E /I /Q /Y`
+          : `cp -r "${localTempDirPath}" "${remoteRepositorykDirPath}"`;
+
+      await new Promise((resolve, reject) => {
+        exec(copyCommand, (error) => (error ? reject(error) : resolve(null)));
+      });
+
+      await fs.rm(localTempDirPath, { recursive: true, force: true });
+
+      return { status: 'success', filePath: remoteRepositoryFilePath };
+    } catch (error) {
+      this.logger.error('File transfer failed:', error);
+      return {
+        status: 'failed',
+        errorCode: PublishedRecipeErrorCode.FileTransferError,
+        errorDescription: error,
+        filePath: null,
+      };
+    }
   }
 }

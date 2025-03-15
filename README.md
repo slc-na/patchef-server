@@ -22,7 +22,7 @@ Please follow these instructions to maintain consistency, quality, and strict ad
 
 Before contributing, ensure you have the following installed:
 
-- **npm** (for managing dependencies)
+- **pnpm** (for managing dependencies)
 - **ESLint & Prettier** (linter and formatter) extension in VS Code
 
 ## Code Editor Setup

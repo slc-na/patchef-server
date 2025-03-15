@@ -1,7 +1,9 @@
 # PatChef Server
+
 **PatChef** is a user-friendly batch script builder designed to simplify the creation and management of batch files. With an intuitive drag-and-drop interface, you can effortlessly organize commands and logic into a visual workflow, eliminating the need for manual scripting. This is the server counterpart of the [PatChef Client module](https://github.com/6ixB/patchef-client), that will be used as the server api of the PatChef services.
 
 ### Key Features:
+
 - **Drag-and-Drop Commands**: Easily assemble commands from a pre-built library, organizing them in your preferred sequence.
 - **Interactive Command Management**: Modify, rearrange, and configure commands using a simple, interactive interface.
 - **Real-time Script Preview**: Instantly see the batch script generated from your command flow, allowing for easy tweaks.
@@ -9,7 +11,8 @@
 - **Export & Execute**: Export your script directly as a batch file, ready for execution on any system.
 
 # API Documentation
-PatChef API documentation is available at the ```/docs``` route.
+
+PatChef API documentation is available at the `/docs` route.
 
 # Contribution Guidelines
 
@@ -34,6 +37,7 @@ For a consistent development experience, set the following preferences:
 To maintain readability and consistency in the codebase, adhere to the following naming conventions:
 
 ### File Names
+
 - Use **kebab-case** for file names.
   - Example: `example-file-name.tsx`
 
@@ -50,14 +54,14 @@ Always create a new branch when contributing. Follow the branch naming conventio
 
 We follow **semantic commit messages**. Learn more about the conventions from this [guide](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716).
 
-To commit please run ```npm run commit```
+To commit please run `npm run commit`
 
 ### Semantic Commit Messages Tool
 
 To streamline your commit process, install the following tool to commit with semantic messages:  
 [git-cz](https://github.com/streamich/git-cz)
 
-Note: Please use ```git-cz --disable-emoji```, 
+Note: Please use `git-cz --disable-emoji`,
 I have come to realize that using emojis in commits is a God-level cringe, and should be avoided at all costs.
 
 ---
@@ -67,34 +71,34 @@ By following this guide, you help ensure the codebase remains clean, maintainabl
 ## Project setup
 
 ```bash
-$ npm install
+$ pnpm install
 ```
 
 ## Compile and run the project
 
 ```bash
 # development
-$ npm run start
+$ pnpm start
 
 # watch mode
-$ npm run start:dev
+$ pnpm start:dev
 
 # commit changes
-$ npm run commit
+$ pnpm commit
 
 # production mode
-$ npm run start:prod
+$ pnpm start:prod
 ```
 
 ## Run tests
 
 ```bash
 # unit tests
-$ npm run test
+$ pnpm test
 
 # e2e tests
-$ npm run test:e2e
+$ pnpm test:e2e
 
 # test coverage
-$ npm run test:cov
+$ pnpm test:cov
 ```

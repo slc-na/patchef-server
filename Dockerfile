@@ -5,12 +5,14 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm install
+RUN npm install -g pnpm
+
+RUN pnpm install
 
 COPY . .
 
-RUN npx prisma generate
-RUN npm run build
+RUN pnpm dlx prisma generate
+RUN pnpm build
 
 FROM node:20-alpine
 
@@ -22,4 +24,4 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 6970
 
-CMD ["sh", "-c", "npm run migrate:deploy && npm run start:prod"]
+CMD ["sh", "-c", "pnpm migrate:deploy && pnpm start:prod"]

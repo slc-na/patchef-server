@@ -23,7 +23,7 @@ Please follow these instructions to maintain consistency, quality, and strict ad
 Before contributing, ensure you have the following installed:
 
 - **pnpm** (for managing dependencies)
-- **ESLint & Prettier** (linter and formatter) extension in VS Code
+- [**Prettier ESLint**](https://github.com/idahogurl/vs-code-prettier-eslint) (linter and formatter) extension in VS Code
 
 ## Code Editor Setup
 

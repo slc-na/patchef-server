@@ -77,61 +77,65 @@ export class CommandsService {
   }
 
   async uploadCommand(
-    uploadCommandDTO: UploadCommandDTO,
-  ): Promise<{ message: string; filePath: string }> {
-    try {
-      const { folderName, commands } = uploadCommandDTO;
+  uploadCommandDTO: UploadCommandDTO,
+): Promise<{ message: string; filePath: string }> {
+  try {
+    const { folderName, commands } = uploadCommandDTO;
 
-      if (!fs.existsSync(this.localTempPath)) {
-        fs.mkdirSync(this.localTempPath, { recursive: true });
-      }
+    if (!fs.existsSync(this.localTempPath)) {
+      fs.mkdirSync(this.localTempPath, { recursive: true });
+    }
 
-      const batchFileName = 'main.bat';
-      const localFilePath = path.join(this.localTempPath, batchFileName);
-      const batchContent = commands.join('\r\n');
-      const academicYear = this.getAcademicYear();
-      fs.writeFileSync(localFilePath, batchContent);
-      console.log(`Batch file created at: ${localFilePath}`);
+    const batchFileName = 'main.bat';
+    const localFilePath = path.join(this.localTempPath, batchFileName);
+    const batchContent = commands.join('\n'); // Use '\n' for Linux line endings
+    const academicYear = this.getAcademicYear();
+    fs.writeFileSync(localFilePath, batchContent);
+    console.log(`Batch file created at: ${localFilePath}`);
 
-      const networkPath = `\\\\10.22.64.20\\Public\\${academicYear}\\${folderName}\\`;
+    const networkPath = `/mnt/10.22.64.20/Public/${academicYear}/${folderName}/`;
 
-      const mkdirCommand = `mkdir "${networkPath.substring(0, networkPath.lastIndexOf('\\'))}"`;
+    // Ensure the target directory exists using `mkdir -p`
+    const mkdirCommand = `mkdir -p "${networkPath}"`;
 
-      return new Promise((resolve, reject) => {
-        exec(mkdirCommand, (mkdirError) => {
-          if (mkdirError) {
-            console.error('Failed to create directory:', mkdirError.message);
-            reject({
-              error: 'Failed to create target directory',
-              details: mkdirError.message,
-            });
-            return;
-          }
-          const copyCommand = `xcopy /Y "${localFilePath}" "${networkPath}"`;
-
-          exec(copyCommand, (copyError, stdout, stderr) => {
-            if (copyError) {
-              console.error('Copy Transfer Failed:', copyError.message);
-              reject({
-                error: 'Failed to transfer batch file',
-                details: copyError.message,
-              });
-            } else {
-              console.log('Copy Transfer Output:', stdout);
-              console.error('Copy Transfer Errors:', stderr);
-              resolve({
-                message: 'Batch file uploaded and transferred successfully',
-                filePath: networkPath,
-              });
-            }
+    return new Promise((resolve, reject) => {
+      exec(mkdirCommand, (mkdirError) => {
+        if (mkdirError) {
+          console.error('Failed to create directory:', mkdirError.message);
+          reject({
+            error: 'Failed to create target directory',
+            details: mkdirError.message,
           });
+          return;
+        }
+
+        // Copy the file using `cp`
+        const copyCommand = `cp "${localFilePath}" "${networkPath}"`;
+
+        exec(copyCommand, (copyError, stdout, stderr) => {
+          if (copyError) {
+            console.error('Copy Transfer Failed:', copyError.message);
+            reject({
+              error: 'Failed to transfer batch file',
+              details: copyError.message,
+            });
+          } else {
+            console.log('Copy Transfer Output:', stdout);
+            console.error('Copy Transfer Errors:', stderr);
+            resolve({
+              message: 'Batch file uploaded and transferred successfully',
+              filePath: networkPath,
+            });
+          }
         });
       });
-    } catch (error) {
-      console.error('Error in uploadCommand:', error);
-      throw new Error('Failed to process batch file');
-    }
+    });
+  } catch (error) {
+    console.error('Error in uploadCommand:', error);
+    throw new Error('Failed to process batch file');
   }
+}
+
   async createBulk(commandEntities: CommandEntity[]) {
     const commands = await this.prismaService.$transaction(async (prisma) => {
       const commands = [];

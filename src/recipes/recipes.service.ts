@@ -18,7 +18,7 @@ import { exec } from 'child_process';
 export class RecipesService {
   private readonly logger = new Logger(RecipesService.name);
 
-  private readonly recipeRepositoryDirectory = `${this.configService.get<string>('RECIPE_REPOSITORY_SERVER_URL')}`;
+  private readonly recipeRepositoryDirectory = `${this.configService.get<string>('RECIPE_REPOSITORY_SERVER_URI')}`;
   private readonly localTempPath = path.join(__dirname, '..', 'temp');
 
   constructor(

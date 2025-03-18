@@ -16,11 +16,16 @@ export const environmentSchema = Joi.object({
   POSTGRES_DB: Joi.string().default('patchef'),
 
   // Prisma Configuration
-  DATABASE_URL: Joi.string(),
+  DATABASE_URL: Joi.string().required(),
 
   // Client Configuration
-  CLIENT_URL: Joi.string().uri(),
+  CLIENT_URL: Joi.string().uri().required(),
 
   // Recipe Repository Server
-  RECIPE_REPOSITORY_SERVER_URL: Joi.string(),
+  RECIPE_REPOSITORY_SERVER_URI: Joi.alternatives()
+    .try(
+      Joi.string().uri(),
+      Joi.string().pattern(/^\\\\[\w.-]+(\\[\w\s.-]+)+$/), // UNC path pattern
+    )
+    .required(),
 });

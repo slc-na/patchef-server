@@ -24,12 +24,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate:dev": "npx prisma migrate dev",
-    "migrate:dev:create": "npx prisma migrate dev --create-only",
-    "migrate:deploy": "npx prisma migrate deploy",
-    "prisma:generate": "npx prisma generate",
-    "prisma:studio": "npx prisma studio",
-    "prisma:seed": "npx prisma db seed"
+    "migrate:dev": "pnpm dlx prisma migrate dev",
+    "migrate:dev:create": "pnpm dlx prisma migrate dev --create-only",
+    "migrate:deploy": "pnpm dlx prisma migrate deploy",
+    "prisma:generate": "pnpm dlx prisma generate",
+    "prisma:studio": "pnpm dlx prisma studio",
+    "prisma:seed": "pnpm dlx prisma db seed"
   },
   "dependencies": {
     "@fastify/static": "^7.0.4",
@@ -97,5 +97,15 @@
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "@swc/core",
+      "esbuild",
+      "prisma"
+    ]
   }
 }

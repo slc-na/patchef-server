@@ -10,10 +10,10 @@ export default () => ({
     db: process.env.POSTGRES_DB || 'patchef',
   },
   client: {
-    url: process.env.CLIENT_URL || 'http://localhost:6969',
+    url: process.env.CLIENT_URL,
   },
   recipeRepository: {
-    serverUrl:
-      process.env.RECIPE_REPOSITORY_SERVER_URL || '\\\\10.22.64.20\\Public',
+    serverUri:
+      process.env.RECIPE_REPOSITORY_SERVER_URI,
   },
 });

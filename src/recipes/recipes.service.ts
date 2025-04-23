@@ -385,13 +385,13 @@ export class RecipesService {
   ): Promise<PublishedRecipeEntity> {
     const { directoryName, fileName, overwrite, commands } = publishRecipeDto;
 
-    const localTempDirPath = `${this.localTempPath}\\${directoryName}`;
+    const pathDelimiter = process.platform === 'win32' ? '\\' : '/';
+    const localTempDirPath = `${this.localTempPath}${pathDelimiter}${directoryName}`;
     const localFilePath = path.join(localTempDirPath, fileName);
 
     const batchContent = commands.join('\r\n');
 
     const academicYear = this.getAcademicYear();
-    const pathDelimiter = process.platform === 'win32' ? '\\' : '/';
     const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}${pathDelimiter}${academicYear}${pathDelimiter}${directoryName}${pathDelimiter}`;
     const remoteRepositoryFilePath = path.join(
       remoteRepositorykDirPath,

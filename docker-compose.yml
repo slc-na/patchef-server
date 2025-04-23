@@ -16,6 +16,11 @@ services:
     networks:
       - patchef-frontend-network
       - patchef-backend-network
+    cap_add:
+       - SYS_ADMIN
+    privileged: true 
+    command: >
+      sh -c "sudo mount -t cifs -o username=$$ZOU_USERNAME,password=$$ZOU_PASSWORD //10.22.64.20/Public/ /mnt/share && npm run migrate:deploy && npm run start:prod"
 
   patchef-database:
     image: postgres:14

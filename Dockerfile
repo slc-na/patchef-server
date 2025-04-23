@@ -24,6 +24,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 
+RUN mkdir -p /mnt/share
+
 EXPOSE 6970
 
 CMD ["sh", "-c", "pnpm migrate:deploy && pnpm start:prod"]

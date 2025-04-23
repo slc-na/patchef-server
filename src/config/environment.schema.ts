@@ -22,10 +22,5 @@ export const environmentSchema = Joi.object({
   CLIENT_URL: Joi.string().uri().required(),
 
   // Recipe Repository Server
-  RECIPE_REPOSITORY_SERVER_URI: Joi.alternatives()
-    .try(
-      Joi.string().uri(),
-      Joi.string().pattern(/^\\\\[\w.-]+(\\[\w\s.-]+)+$/), // UNC path pattern
-    )
-    .required(),
+  RECIPE_REPOSITORY_SERVER_URI: Joi.string(),
 });

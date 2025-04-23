@@ -391,7 +391,8 @@ export class RecipesService {
     const batchContent = commands.join('\r\n');
 
     const academicYear = this.getAcademicYear();
-    const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}\\${academicYear}\\${directoryName}\\`;
+    const pathDelimiter = process.platform === 'win32' ? '\\' : '/';
+    const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}${pathDelimiter}${academicYear}${pathDelimiter}${directoryName}${pathDelimiter}`;
     const remoteRepositoryFilePath = path.join(
       remoteRepositorykDirPath,
       fileName,

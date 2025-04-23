@@ -20,7 +20,7 @@ services:
        - SYS_ADMIN
     privileged: true 
     command: >
-      sh -c "sudo mount -t cifs -o username=$$RECIPE_REPOSITORY_SERVER_USERNAME,password=$$RECIPE_REPOSITORY_SERVER_PASSWORD //10.22.64.20/Public/ /mnt/share"
+      sh -c "sudo mount -t cifs -o username=$$RECIPE_REPOSITORY_SERVER_USERNAME,password=$$RECIPE_REPOSITORY_SERVER_PASSWORD $$RECIPE_REPOSITORY_SERVER_URI $$RECIPE_REPOSITORY_SERVER_MOUNT_POINT"
 
   patchef-database:
     image: postgres:14

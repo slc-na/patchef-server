@@ -22,5 +22,8 @@ export const environmentSchema = Joi.object({
   CLIENT_URL: Joi.string().uri().required(),
 
   // Recipe Repository Server
+  RECIPE_REPOSITORY_SERVER_USERNAME: Joi.string(),
+  RECIPE_REPOSITORY_SERVER_PASSWORD: Joi.string(),
   RECIPE_REPOSITORY_SERVER_URI: Joi.string(),
+  RECIPE_REPOSITORY_SERVER_MOUNT_POINT: Joi.string(),
 });

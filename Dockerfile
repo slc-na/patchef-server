@@ -28,4 +28,4 @@ RUN mkdir -p /mnt/share
 
 EXPOSE 6970
 
-CMD ["sh", "-c", "pnpm migrate:deploy && pnpm start:prod"]
+CMD ["sh", "-c", "mount -t cifs -o username=$RECIPE_REPOSITORY_SERVER_USERNAME,password=$RECIPE_REPOSITORY_SERVER_PASSWORD $RECIPE_REPOSITORY_SERVER_URI $RECIPE_REPOSITORY_SERVER_MOUNT_POINT && pnpm migrate:deploy && pnpm start:prod"]

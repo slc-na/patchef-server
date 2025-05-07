@@ -8,9 +8,6 @@ services:
     restart: always
     ports:
       - '6970:6970'
-    depends_on:
-      patchef-database:
-        condition: service_healthy
     env_file:
       - .env
     networks:
@@ -18,31 +15,7 @@ services:
       - patchef-backend-network
     cap_add:
        - SYS_ADMIN
-    privileged: true 
-    command: >
-      sh -c "sudo mount -t cifs -o username=$$RECIPE_REPOSITORY_SERVER_USERNAME,password=$$RECIPE_REPOSITORY_SERVER_PASSWORD $$RECIPE_REPOSITORY_SERVER_URI $$RECIPE_REPOSITORY_SERVER_MOUNT_POINT"
-
-  patchef-database:
-    image: postgres:14
-    container_name: patchef-database
-    restart: always
-    ports:
-      - '5432:5432'
-    env_file:
-      - .env
-    volumes:
-      - patchef-database:/var/lib/postgresql/data
-    networks:
-      - patchef-backend-network
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  patchef-database:
-    name: patchef-database
+    privileged: true
 
 networks:
   patchef-frontend-network:

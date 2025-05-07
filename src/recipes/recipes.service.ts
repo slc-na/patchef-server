@@ -18,7 +18,12 @@ import { exec } from 'child_process';
 export class RecipesService {
   private readonly logger = new Logger(RecipesService.name);
 
-  private readonly recipeRepositoryDirectory = `${this.configService.get<string>('RECIPE_REPOSITORY_SERVER_MOUNT_POINT')}`;
+  private readonly recipeRepositoryDirectory = this.configService.get<string>(
+    'RECIPE_REPOSITORY_SERVER_MOUNT_POINT',
+  );
+  private readonly recipeRepositoryUri = this.configService.get<string>(
+    'RECIPE_REPOSITORY_SERVER_URI',
+  );
   private readonly localTempPath = path.join(__dirname, '..', 'temp');
 
   constructor(
@@ -392,11 +397,13 @@ export class RecipesService {
     const batchContent = commands.join('\r\n');
 
     const academicYear = this.getAcademicYear();
-    const remoteRepositorykDirPath = `${this.recipeRepositoryDirectory}${pathDelimiter}${academicYear}${pathDelimiter}${directoryName}${pathDelimiter}`;
+    const remoteRepositoryDirPath = `${this.recipeRepositoryDirectory}${pathDelimiter}${academicYear}${pathDelimiter}${directoryName}${pathDelimiter}`;
+    const remoteRepositoryUri = `${this.recipeRepositoryUri}${pathDelimiter}${academicYear}${pathDelimiter}${directoryName}${pathDelimiter}`;
     const remoteRepositoryFilePath = path.join(
-      remoteRepositorykDirPath,
+      remoteRepositoryDirPath,
       fileName,
     );
+    const remoteRepositoryFileUri = path.join(remoteRepositoryUri, fileName);
 
     try {
       await fs.access(localTempDirPath);
@@ -426,8 +433,8 @@ export class RecipesService {
     try {
       const copyCommand =
         process.platform === 'win32'
-          ? `xcopy "${localTempDirPath}" "${remoteRepositorykDirPath}" /E /I /Q /Y`
-          : `cp -r "${localTempDirPath}" "${remoteRepositorykDirPath}"`;
+          ? `xcopy "${localTempDirPath}" "${remoteRepositoryDirPath}" /E /I /Q /Y`
+          : `cp -r "${localTempDirPath}" "${remoteRepositoryDirPath}"`;
 
       await new Promise((resolve, reject) => {
         exec(copyCommand, (error) => (error ? reject(error) : resolve(null)));
@@ -435,7 +442,7 @@ export class RecipesService {
 
       await fs.rm(localTempDirPath, { recursive: true, force: true });
 
-      return { status: 'success', filePath: remoteRepositoryFilePath };
+      return { status: 'success', filePath: remoteRepositoryFileUri };
     } catch (error) {
       this.logger.error('File transfer failed:', error);
       return {

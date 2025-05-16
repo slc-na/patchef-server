@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { PublishRecipeDto } from './dto/publish-recipe.dto';
@@ -16,8 +16,6 @@ import { exec } from 'child_process';
 
 @Injectable()
 export class RecipesService {
-  private readonly logger = new Logger(RecipesService.name);
-
   private readonly recipeRepositoryDirectory = this.configService.get<string>(
     'RECIPE_REPOSITORY_SERVER_MOUNT_POINT',
   );
@@ -418,7 +416,6 @@ export class RecipesService {
       // Check if file already exists in remote repository location
       try {
         await fs.access(remoteRepositoryFilePath);
-        this.logger.warn(`File already exists: ${remoteRepositoryFilePath}`);
         return {
           status: 'failed',
           errorCode: PublishedRecipeErrorCode.FileExists,
@@ -434,7 +431,7 @@ export class RecipesService {
       const copyCommand =
         process.platform === 'win32'
           ? `xcopy "${localTempDirPath}" "${remoteRepositoryDirPath}" /E /I /Q /Y`
-          : `cp -r "${localTempDirPath}" "${remoteRepositoryDirPath}"`;
+          : !overwrite ? `cp -r "${localTempDirPath}" "${remoteRepositoryDirPath}"` : `cp -r "${localTempDirPath}${pathDelimiter}." "${remoteRepositoryDirPath}"`;
 
       await new Promise((resolve, reject) => {
         exec(copyCommand, (error) => (error ? reject(error) : resolve(null)));
@@ -444,7 +441,6 @@ export class RecipesService {
 
       return { status: 'success', filePath: remoteRepositoryFileUri };
     } catch (error) {
-      this.logger.error('File transfer failed:', error);
       return {
         status: 'failed',
         errorCode: PublishedRecipeErrorCode.FileTransferError,
